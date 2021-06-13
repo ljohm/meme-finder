@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import dotenv from "dotenv";
-import Loader from "./Loader/loader";
+import Loader from "../Loader/loader";
+import Paginate from "../Paginate/paginate";
+import styles from "./main.module.css";
 dotenv.config();
 
-const Giphy = () => {
+const Main = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const itemsPerPage = 10;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +26,7 @@ const Giphy = () => {
         const res = await axios("https://api.giphy.com/v1/gifs/trending", {
           params: {
             api_key: process.env.REACT_APP_GIPHY_API_KEY,
-            limit: 100,
+            limit: 50,
           },
         });
         setData(res.data.data);
@@ -28,7 +34,6 @@ const Giphy = () => {
         setError(true);
         setTimeout(() => setError(false), 3000);
       }
-      //console.log(res);
       setLoading(false);
     };
     fetchData();
@@ -48,7 +53,7 @@ const Giphy = () => {
         params: {
           api_key: process.env.REACT_APP_GIPHY_API_KEY,
           q: search,
-          limit: 100,
+          limit: 50,
         },
       });
       setData(res.data.data);
@@ -57,6 +62,10 @@ const Giphy = () => {
       setTimeout(() => setError(false), 3000);
     }
     setLoading(false);
+  };
+
+  const pageSelected = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -85,9 +94,15 @@ const Giphy = () => {
           Go
         </button>
       </form>
+      <Paginate
+        pageSelected={pageSelected}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        totalItems={data.length}
+      />
       <div className="container gifs">
         {!loading &&
-          data.map((el) => (
+          currentItems.map((el) => (
             <div key={el.id} className="gif">
               <img src={el.images.fixed_height.url} alt={el.title} />
             </div>
@@ -98,4 +113,4 @@ const Giphy = () => {
   );
 };
 
-export default Giphy;
+export default Main;

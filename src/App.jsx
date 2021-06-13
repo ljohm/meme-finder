@@ -1,11 +1,11 @@
 import React from "react";
-import Giphy from "./components/giphy";
 import "./App.css";
+import Main from "./components/Main/main";
 
 const App = () => {
   return (
     <div>
-      <Giphy />
+      <Main />
     </div>
   );
 };
